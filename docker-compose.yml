@@ -1,0 +1,53 @@
+version: '3.8'
+services:
+  osint-server:
+    image: xucishvilisaba/osint-server
+    depends_on:
+      - db
+      - osint-amass-api
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: osint
+      AMASS_API_DOMAIN: osint-amass-api
+      AMASS_API_PORT: 5000
+      AMASS_API_SCAN_ENDPOINT: scan
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+
+  osint-client:
+    image: xucishvilisaba/osint-client
+    ports:
+      - "80:80"
+    networks:
+      - app-network
+
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: osint 
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  osint-amass-api:
+    image: xucishvilisaba/osint-amass-api
+    ports:
+      - "5000:5000"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
